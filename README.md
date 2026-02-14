@@ -9,7 +9,9 @@ ComfyUI custom nodes for [STAR (Spatial-Temporal Augmentation with Text-to-Video
 - **Auto-download**: all models (UNet checkpoint, OpenCLIP text encoder, temporal VAE) download automatically on first use
 - **VRAM offloading**: three modes to fit GPUs from 12GB to 40GB+
 - **Long video support**: sliding-window chunking with 50% overlap
+- **Segment-based processing**: bound peak RAM for long videos
 - **Color correction**: AdaIN and wavelet-based post-processing
+- **Standalone CLI**: run from the terminal without ComfyUI for long videos
 
 ## Installation
 
@@ -82,6 +84,31 @@ Models are stored in `ComfyUI/models/star/` and auto-downloaded on first use:
 | `heavy_deg.pt` | Heavily compressed/degraded video | [HuggingFace](https://huggingface.co/SherryX/STAR/resolve/main/I2VGen-XL-based/heavy_deg.pt) |
 
 The OpenCLIP text encoder and SVD temporal VAE are downloaded automatically by their respective libraries on first load.
+
+## Standalone CLI
+
+For long videos where ComfyUI's RAM usage becomes a bottleneck, use the standalone script directly. It streams output frames to ffmpeg so peak memory stays bounded regardless of video length.
+
+```bash
+# Activate your ComfyUI Python environment, then:
+python inference.py input.mp4 -o output.mp4
+
+# With model offloading for lower VRAM
+python inference.py input.mp4 -o output.mp4 --offload model --segment-size 8
+
+# Image sequence input/output
+python inference.py frames_in/ -o frames_out/
+
+# Image sequence to video
+python inference.py frames_in/ -o output.mp4 --fps 24
+
+# Single image
+python inference.py photo.png -o photo_4x.png
+```
+
+Audio is automatically copied from the input video. Use `--no-audio` to disable.
+
+Run `python inference.py --help` for all options.
 
 ## Credits
 
