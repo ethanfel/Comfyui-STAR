@@ -29,6 +29,24 @@ if not os.path.isdir(os.path.join(STAR_REPO, "video_to_video")):
 if STAR_REPO not in sys.path:
     sys.path.insert(0, STAR_REPO)
 
+# Apply patches from patches/ directory to the STAR submodule.
+_PATCHES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "patches")
+if os.path.isdir(_PATCHES_DIR):
+    import subprocess as _sp
+    for _patch in sorted(os.listdir(_PATCHES_DIR)):
+        if not _patch.endswith(".patch"):
+            continue
+        _patch_path = os.path.join(_PATCHES_DIR, _patch)
+        # --check + --reverse: succeeds silently if already applied.
+        if _sp.call(
+            ["git", "apply", "--check", "--reverse", _patch_path],
+            cwd=STAR_REPO, stdout=_sp.DEVNULL, stderr=_sp.DEVNULL,
+        ) != 0:
+            if _sp.call(["git", "apply", _patch_path], cwd=STAR_REPO) == 0:
+                print(f"[STAR] Applied patch: {_patch}")
+            else:
+                print(f"[STAR] Warning: failed to apply patch: {_patch}")
+
 # ── Attention backend dispatcher ──────────────────────────────────────
 # Build a registry of available backends at import time.
 # sdpa (PyTorch native) is always available and is the default.

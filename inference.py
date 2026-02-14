@@ -29,8 +29,26 @@ import types
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+STAR_REPO = SCRIPT_DIR / "STAR"
 sys.path.insert(0, str(SCRIPT_DIR))
-sys.path.insert(0, str(SCRIPT_DIR / "STAR"))
+sys.path.insert(0, str(STAR_REPO))
+
+# Apply patches from patches/ directory to the STAR submodule.
+import subprocess  # noqa: E402
+
+_PATCHES_DIR = SCRIPT_DIR / "patches"
+if _PATCHES_DIR.is_dir():
+    for _patch in sorted(_PATCHES_DIR.iterdir()):
+        if _patch.suffix != ".patch":
+            continue
+        if subprocess.call(
+            ["git", "apply", "--check", "--reverse", str(_patch)],
+            cwd=str(STAR_REPO), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        ) != 0:
+            if subprocess.call(["git", "apply", str(_patch)], cwd=str(STAR_REPO)) == 0:
+                print(f"[STAR] Applied patch: {_patch.name}")
+            else:
+                print(f"[STAR] Warning: failed to apply patch: {_patch.name}")
 
 import torch  # noqa: E402 — needed for stub defaults
 
@@ -138,7 +156,6 @@ print(f"[STAR] Available attention backends: {list(_ATTN_BACKENDS.keys())}")
 import argparse  # noqa: E402
 import json  # noqa: E402
 import shutil  # noqa: E402
-import subprocess  # noqa: E402
 
 import numpy as np  # noqa: E402
 from PIL import Image  # noqa: E402
