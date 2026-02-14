@@ -205,8 +205,25 @@ class STARModelLoader:
         # ---- Text encoder (OpenCLIP ViT-H-14) ----
         from video_to_video.modules.embedder import FrozenOpenCLIPEmbedder
 
+        _te_filename = "open_clip_vit_h_14_laion2b.bin"
+        _te_path = folder_paths.get_full_path("text_encoders", _te_filename)
+        if _te_path is None:
+            from huggingface_hub import hf_hub_download
+            import shutil
+            _te_dir = folder_paths.get_folder_paths("text_encoders")[0]
+            os.makedirs(_te_dir, exist_ok=True)
+            print(f"[STAR] Downloading OpenCLIP ViT-H-14 text encoder to {_te_dir}...")
+            _dl = hf_hub_download(
+                repo_id="laion/CLIP-ViT-H-14-laion2B-s32B-b79K",
+                filename="open_clip_pytorch_model.bin",
+                local_dir=_te_dir,
+            )
+            _te_path = os.path.join(_te_dir, _te_filename)
+            shutil.move(_dl, _te_path)
+            print(f"[STAR] Text encoder saved to {_te_path}")
+
         text_encoder = FrozenOpenCLIPEmbedder(
-            device=device, pretrained="laion2b_s32b_b79k"
+            device=device, pretrained=_te_path
         )
         text_encoder.model.to(device)
 
@@ -246,10 +263,42 @@ class STARModelLoader:
         # ---- Temporal VAE (from HuggingFace diffusers) ----
         from diffusers import AutoencoderKLTemporalDecoder
 
+        _vae_dir_name = "svd-temporal-vae"
+        _vae_path = None
+        for _d in folder_paths.get_folder_paths("vae"):
+            _candidate = os.path.join(_d, _vae_dir_name)
+            if os.path.isfile(os.path.join(_candidate, "config.json")):
+                _vae_path = _candidate
+                break
+
+        if _vae_path is None:
+            from huggingface_hub import hf_hub_download
+            import shutil
+            _vae_base = folder_paths.get_folder_paths("vae")[0]
+            _vae_path = os.path.join(_vae_base, _vae_dir_name)
+            os.makedirs(_vae_path, exist_ok=True)
+            print(f"[STAR] Downloading SVD temporal VAE to {_vae_path}...")
+            for _f in ["config.json", "diffusion_pytorch_model.fp16.safetensors"]:
+                _dl = hf_hub_download(
+                    repo_id="stabilityai/stable-video-diffusion-img2vid",
+                    subfolder="vae",
+                    filename=_f,
+                    local_dir=_vae_path,
+                )
+                _dest = os.path.join(_vae_path, _f)
+                if _dl != _dest and os.path.isfile(_dl):
+                    shutil.move(_dl, _dest)
+            # Clean up empty vae/ subdirectory created by hf_hub_download
+            _vae_sub = os.path.join(_vae_path, "vae")
+            if os.path.isdir(_vae_sub):
+                try:
+                    os.rmdir(_vae_sub)
+                except OSError:
+                    pass
+            print(f"[STAR] Temporal VAE saved to {_vae_path}")
+
         vae = AutoencoderKLTemporalDecoder.from_pretrained(
-            "stabilityai/stable-video-diffusion-img2vid",
-            subfolder="vae",
-            variant="fp16",
+            _vae_path, variant="fp16",
         )
         vae.eval()
         vae.requires_grad_(False)
