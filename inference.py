@@ -68,6 +68,24 @@ sys.modules["comfy"] = _comfy
 sys.modules["comfy.utils"] = _comfy_utils
 sys.modules["comfy.model_management"] = _comfy_mm
 
+# ── xformers compatibility shim (use PyTorch native SDPA if unavailable) ──
+if "xformers" not in sys.modules:
+    try:
+        import xformers  # noqa: F401
+    except ImportError:
+        _xformers = types.ModuleType("xformers")
+        _xformers_ops = types.ModuleType("xformers.ops")
+
+        def _memory_efficient_attention(q, k, v, attn_bias=None, op=None):
+            return torch.nn.functional.scaled_dot_product_attention(
+                q, k, v, attn_mask=attn_bias,
+            )
+
+        _xformers_ops.memory_efficient_attention = _memory_efficient_attention
+        _xformers.ops = _xformers_ops
+        sys.modules["xformers"] = _xformers
+        sys.modules["xformers.ops"] = _xformers_ops
+
 # ── Standard imports ────────────────────────────────────────────────────
 import argparse  # noqa: E402
 import json  # noqa: E402
