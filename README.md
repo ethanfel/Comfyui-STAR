@@ -21,7 +21,7 @@ Search for `ComfyUI-STAR` in ComfyUI Manager and install.
 
 ```bash
 cd ComfyUI/custom_nodes
-git clone --recursive git@192.168.1.1:Ethanfel/Comfyui-STAR.git
+git clone --recursive https://github.com/ethanfel/Comfyui-STAR.git
 cd Comfyui-STAR
 pip install -r requirements.txt
 ```
@@ -56,6 +56,7 @@ Runs the STAR diffusion pipeline on an image batch.
 | **max_chunk_len** | Max frames per chunk (4–128, default 32). Lower = less VRAM for long videos. |
 | **seed** | Random seed for reproducibility. |
 | **color_fix** | `adain` (match color stats), `wavelet` (preserve low-frequency color), or `none`. |
+| **segment_size** | Process video in segments of this many frames to reduce RAM usage (0–256, default 0). 0 = process all at once. Recommended: 16–32 for long videos. Segments overlap by 25% with linear crossfade blending. |
 
 ## VRAM Requirements
 

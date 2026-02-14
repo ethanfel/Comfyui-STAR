@@ -205,6 +205,10 @@ class STARVideoSuperResolution:
                     "default": "adain",
                     "tooltip": "Post-processing color correction. adain: match color stats from input. wavelet: preserve input low-frequency color. none: no correction.",
                 }),
+                "segment_size": ("INT", {
+                    "default": 0, "min": 0, "max": 256,
+                    "tooltip": "Process video in segments of this many frames to reduce RAM usage. 0 = process all at once. Recommended: 16-32 for long videos.",
+                }),
             }
         }
 
@@ -226,10 +230,9 @@ class STARVideoSuperResolution:
         max_chunk_len,
         seed,
         color_fix,
+        segment_size=0,
     ):
-        from .star_pipeline import run_star_inference
-
-        result = run_star_inference(
+        kwargs = dict(
             star_model=star_model,
             images=images,
             upscale=upscale,
@@ -241,6 +244,14 @@ class STARVideoSuperResolution:
             seed=seed,
             color_fix=color_fix,
         )
+
+        if segment_size > 0:
+            from .star_pipeline import run_star_inference_segmented
+            result = run_star_inference_segmented(segment_size=segment_size, **kwargs)
+        else:
+            from .star_pipeline import run_star_inference
+            result = run_star_inference(**kwargs)
+
         return (result,)
 
 
