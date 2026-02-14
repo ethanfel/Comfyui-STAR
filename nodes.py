@@ -14,6 +14,16 @@ folder_paths.folder_names_and_paths["star"] = (
 
 # Put the cloned STAR repo on sys.path so its internal imports work.
 STAR_REPO = os.path.join(os.path.dirname(os.path.realpath(__file__)), "STAR")
+
+# Auto-initialize the git submodule if it's empty (e.g. cloned without --recursive).
+if not os.path.isdir(os.path.join(STAR_REPO, "video_to_video")):
+    import subprocess
+    print("[STAR] Submodule not found — running git submodule update --init ...")
+    subprocess.check_call(
+        ["git", "submodule", "update", "--init", "--recursive"],
+        cwd=os.path.dirname(os.path.realpath(__file__)),
+    )
+
 if STAR_REPO not in sys.path:
     sys.path.insert(0, STAR_REPO)
 
