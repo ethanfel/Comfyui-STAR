@@ -68,7 +68,8 @@ sys.modules["comfy"] = _comfy
 sys.modules["comfy.utils"] = _comfy_utils
 sys.modules["comfy.model_management"] = _comfy_mm
 
-# ── xformers compatibility shim (use PyTorch native SDPA if unavailable) ──
+# ── xformers compatibility shim ──────────────────────────────────────────
+# Priority: SageAttention (fastest) > PyTorch native SDPA (always available).
 if "xformers" not in sys.modules:
     try:
         import xformers  # noqa: F401
@@ -76,10 +77,19 @@ if "xformers" not in sys.modules:
         _xformers = types.ModuleType("xformers")
         _xformers_ops = types.ModuleType("xformers.ops")
 
-        def _memory_efficient_attention(q, k, v, attn_bias=None, op=None):
-            return torch.nn.functional.scaled_dot_product_attention(
-                q, k, v, attn_mask=attn_bias,
-            )
+        try:
+            from sageattention import sageattn as _sageattn
+
+            def _memory_efficient_attention(q, k, v, attn_bias=None, op=None):
+                return _sageattn(
+                    q.unsqueeze(0), k.unsqueeze(0), v.unsqueeze(0),
+                    tensor_layout="HND", is_causal=False,
+                ).squeeze(0)
+        except ImportError:
+            def _memory_efficient_attention(q, k, v, attn_bias=None, op=None):
+                return torch.nn.functional.scaled_dot_product_attention(
+                    q, k, v, attn_mask=attn_bias,
+                )
 
         _xformers_ops.memory_efficient_attention = _memory_efficient_attention
         _xformers.ops = _xformers_ops
