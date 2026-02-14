@@ -28,6 +28,10 @@ pip install -r requirements.txt
 
 > The `--recursive` flag clones the STAR submodule. If you forgot it, run `git submodule update --init` afterwards.
 
+## Example Workflow
+
+A ready-to-use workflow is included in [`example_workflows/star_basic_workflow.json`](example_workflows/star_basic_workflow.json). Drag and drop it onto the ComfyUI canvas to load it, then select your input image or connect a video loader.
+
 ## Nodes
 
 ### STAR Model Loader

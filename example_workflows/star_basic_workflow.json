@@ -1,0 +1,130 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "STARModelLoader",
+      "pos": [50, 150],
+      "size": [315, 130],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "star_model",
+          "type": "STAR_MODEL",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "STARModelLoader"
+      },
+      "widgets_values": ["light_deg.pt", "fp16", "disabled"]
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [50, 370],
+      "size": [315, 314],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [2],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": ["example.png", "image"]
+    },
+    {
+      "id": 3,
+      "type": "STARVideoSuperResolution",
+      "pos": [500, 150],
+      "size": [365, 430],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "star_model",
+          "type": "STAR_MODEL",
+          "link": 1
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [3],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "STARVideoSuperResolution"
+      },
+      "widgets_values": [4, 15, 7.5, "", "fast", 32, 0, "fixed", "adain", 0]
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [960, 150],
+      "size": [400, 400],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "STAR_MODEL"],
+    [2, 2, 0, 3, 1, "IMAGE"],
+    [3, 3, 0, 4, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "STAR Video Super-Resolution Demo",
+      "bounding": [20, 70, 1380, 680],
+      "color": "#3f789e",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}
