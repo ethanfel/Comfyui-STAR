@@ -304,7 +304,7 @@ def run_star_inference(
     if offload != "disabled":
         text_encoder.model.to(device)
         text_encoder.device = device
-    text = (prompt if prompt.strip() else "") + cfg.positive_prompt
+    text = ((prompt.strip() + " ") if prompt.strip() else "") + cfg.positive_prompt
     print(f"[STAR DEBUG] prompt: {text[:80]}...")
     y = text_encoder(text).detach()
     _dbg("text_embedding", y)
