@@ -141,6 +141,7 @@ def run_star_inference_segmented(
     solver_mode: str = "fast",
     max_chunk_len: int = 32,
     seed: int = 0,
+    denoise: float = 0.9,
     color_fix: str = "adain",
 ) -> torch.Tensor:
     """Run STAR inference in overlapping segments to bound peak RAM usage.
@@ -156,7 +157,8 @@ def run_star_inference_segmented(
         return run_star_inference(
             star_model=star_model, images=images, upscale=upscale, steps=steps,
             guide_scale=guide_scale, prompt=prompt, solver_mode=solver_mode,
-            max_chunk_len=max_chunk_len, seed=seed, color_fix=color_fix,
+            max_chunk_len=max_chunk_len, seed=seed, denoise=denoise,
+            color_fix=color_fix,
         )
 
     overlap = max(2, segment_size // 4)
@@ -195,6 +197,7 @@ def run_star_inference_segmented(
             solver_mode=solver_mode,
             max_chunk_len=max_chunk_len,
             seed=seed,
+            denoise=denoise,
             color_fix=color_fix,
         )
         # seg_result: [F_seg, H, W, 3] float32 on CPU
@@ -246,6 +249,7 @@ def run_star_inference(
     solver_mode: str = "fast",
     max_chunk_len: int = 32,
     seed: int = 0,
+    denoise: float = 0.9,
     color_fix: str = "adain",
 ) -> torch.Tensor:
     """Run STAR video super-resolution and return ComfyUI IMAGE batch."""
@@ -265,7 +269,7 @@ def run_star_inference(
     if offload == "aggressive":
         vae_dec_chunk = 1
 
-    total_noise_levels = 900
+    total_noise_levels = int(round(denoise * 1000))
 
     # -- Convert ComfyUI frames to STAR format --
     video_data = comfyui_to_star_frames(images)  # [F, 3, H, W]

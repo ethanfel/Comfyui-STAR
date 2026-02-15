@@ -311,7 +311,7 @@ class STARVideoSuperResolution:
                 }),
                 "prompt": ("STRING", {
                     "default": "", "multiline": True,
-                    "tooltip": "Text prompt describing the desired output. Leave empty to use STAR's built-in quality prompt.",
+                    "tooltip": "Optional text prompt. STAR's built-in quality prompt is always appended. Leave empty to use only the quality prompt.",
                 }),
                 "solver_mode": (["fast", "normal"], {
                     "default": "fast",
@@ -324,6 +324,10 @@ class STARVideoSuperResolution:
                 "seed": ("INT", {
                     "default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF,
                     "tooltip": "Random seed for reproducible results.",
+                }),
+                "denoise": ("FLOAT", {
+                    "default": 0.9, "min": 0.1, "max": 1.0, "step": 0.05,
+                    "tooltip": "How much noise to add before denoising. 0.9 = STAR default (preserves input structure). 1.0 = full denoise (starts from pure noise). Lower values preserve more of the original.",
                 }),
                 "color_fix": (["adain", "wavelet", "none"], {
                     "default": "adain",
@@ -353,6 +357,7 @@ class STARVideoSuperResolution:
         solver_mode,
         max_chunk_len,
         seed,
+        denoise,
         color_fix,
         segment_size=0,
     ):
@@ -368,6 +373,7 @@ class STARVideoSuperResolution:
             solver_mode=solver_mode,
             max_chunk_len=max_chunk_len,
             seed=seed,
+            denoise=denoise,
             color_fix=color_fix,
         )
 
