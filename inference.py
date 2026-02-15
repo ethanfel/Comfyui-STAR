@@ -294,23 +294,7 @@ def load_model(model_path: str, precision: str, offload: str, device: torch.devi
     from video_to_video.utils.config import cfg
 
     print("[STAR] Loading text encoder (OpenCLIP ViT-H-14)...")
-    _models_dir = (SCRIPT_DIR / ".." / ".." / "models").resolve()
-    _te_filename = "open_clip_vit_h_14_laion2b.bin"
-    _te_dir = _models_dir / "text_encoders"
-    _te_path = _te_dir / _te_filename
-    if not _te_path.is_file():
-        from huggingface_hub import hf_hub_download
-        _te_dir.mkdir(parents=True, exist_ok=True)
-        print(f"[STAR] Downloading OpenCLIP ViT-H-14 text encoder to {_te_dir}...")
-        _dl = hf_hub_download(
-            repo_id="laion/CLIP-ViT-H-14-laion2B-s32B-b79K",
-            filename="open_clip_pytorch_model.bin",
-            local_dir=str(_te_dir),
-        )
-        shutil.move(str(_dl), str(_te_path))
-        print(f"[STAR] Text encoder saved to {_te_path}")
-
-    text_encoder = FrozenOpenCLIPEmbedder(device=device, pretrained=str(_te_path))
+    text_encoder = FrozenOpenCLIPEmbedder(device=device, pretrained="laion2b_s32b_b79k")
     text_encoder.model.to(device)
     negative_y = text_encoder(cfg.negative_prompt).detach()
     text_encoder.model.to(keep_on)
@@ -339,33 +323,9 @@ def load_model(model_path: str, precision: str, offload: str, device: torch.devi
     from diffusers import AutoencoderKLTemporalDecoder
 
     print("[STAR] Loading temporal VAE...")
-    _vae_dir_name = "svd-temporal-vae"
-    _vae_path = _models_dir / "vae" / _vae_dir_name
-    if not (_vae_path / "config.json").is_file():
-        from huggingface_hub import hf_hub_download
-        _vae_path.mkdir(parents=True, exist_ok=True)
-        print(f"[STAR] Downloading SVD temporal VAE to {_vae_path}...")
-        for _f in ["config.json", "diffusion_pytorch_model.fp16.safetensors"]:
-            _dl = hf_hub_download(
-                repo_id="stabilityai/stable-video-diffusion-img2vid",
-                subfolder="vae",
-                filename=_f,
-                local_dir=str(_vae_path),
-            )
-            _dest = _vae_path / _f
-            if Path(_dl) != _dest and Path(_dl).is_file():
-                shutil.move(str(_dl), str(_dest))
-        # Clean up empty vae/ subdirectory created by hf_hub_download
-        _vae_sub = _vae_path / "vae"
-        if _vae_sub.is_dir():
-            try:
-                _vae_sub.rmdir()
-            except OSError:
-                pass
-        print(f"[STAR] Temporal VAE saved to {_vae_path}")
-
     vae = AutoencoderKLTemporalDecoder.from_pretrained(
-        str(_vae_path), variant="fp16",
+        "stabilityai/stable-video-diffusion-img2vid",
+        subfolder="vae", variant="fp16",
     )
     vae.eval()
     vae.requires_grad_(False)
