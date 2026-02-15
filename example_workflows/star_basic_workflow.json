@@ -6,7 +6,7 @@
       "id": 1,
       "type": "STARModelLoader",
       "pos": [50, 150],
-      "size": [315, 130],
+      "size": [315, 158],
       "flags": {},
       "order": 0,
       "mode": 0,
@@ -22,7 +22,7 @@
       "properties": {
         "Node name for S&R": "STARModelLoader"
       },
-      "widgets_values": ["light_deg.pt", "fp16", "disabled"]
+      "widgets_values": ["light_deg.pt", "fp16", "disabled", "sdpa"]
     },
     {
       "id": 2,
@@ -83,7 +83,7 @@
       "properties": {
         "Node name for S&R": "STARVideoSuperResolution"
       },
-      "widgets_values": [4, 15, 7.5, "", "fast", 32, 0, "fixed", "adain", 0]
+      "widgets_values": [4, 15, 7.5, "", "fast", 32, 0, 0.9, "adain", 0]
     },
     {
       "id": 4,
