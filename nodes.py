@@ -186,7 +186,7 @@ class STARModelLoader:
                 }),
                 "precision": (["fp16", "bf16", "fp32"], {
                     "default": "fp16",
-                    "tooltip": "Weight precision. fp16 is recommended (fastest, lowest VRAM). bf16 for newer GPUs. fp32 for maximum quality at 2x VRAM cost.",
+                    "tooltip": "Inference precision. fp16 is recommended (fastest, lowest VRAM). bf16 for newer GPUs. fp32 disables autocast for maximum quality at 2x VRAM cost.",
                 }),
                 "offload": (["disabled", "model", "aggressive"], {
                     "default": "disabled",
