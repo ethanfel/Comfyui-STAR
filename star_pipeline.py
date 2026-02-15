@@ -265,7 +265,7 @@ def run_star_inference(
     if offload == "aggressive":
         vae_dec_chunk = 1
 
-    total_noise_levels = 1000
+    total_noise_levels = 900
 
     # -- Convert ComfyUI frames to STAR format --
     video_data = comfyui_to_star_frames(images)  # [F, 3, H, W]
@@ -291,7 +291,7 @@ def run_star_inference(
     if offload != "disabled":
         text_encoder.model.to(device)
         text_encoder.device = device
-    text = prompt if prompt.strip() else cfg.positive_prompt
+    text = (prompt if prompt.strip() else "") + cfg.positive_prompt
     y = text_encoder(text).detach()
     if offload != "disabled":
         text_encoder.model.to("cpu")
